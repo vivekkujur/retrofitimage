@@ -1,6 +1,5 @@
 package com.example.uchiha.lokaldemo.retrofit;
 
-import com.example.uchiha.lokaldemo.modelpojo.MultipleResources;
 import com.example.uchiha.lokaldemo.modelpojo.Recycler_model;
 
 import java.util.List;

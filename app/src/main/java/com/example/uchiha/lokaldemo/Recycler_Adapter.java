@@ -1,12 +1,17 @@
 package com.example.uchiha.lokaldemo;
 
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import static android.content.ContentValues.TAG;
@@ -35,7 +41,7 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
 
     private final Context context;
     private String name;
-    ProgressDialog progressDialog;
+
 
     public Recycler_Adapter(List<Recycler_model> dataSet, Context context) {
         this.context=context;
@@ -48,7 +54,6 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
 
         View view=LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.imagecard,parent,false);
-        progressDialog=new ProgressDialog(context);
         Recycler_holder recycler_holder =new Recycler_holder(view);
 
         return recycler_holder;
@@ -61,22 +66,22 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
 
 
       holder.filename.setText(dataSet.get(position).getFilename());
-
       holder.button.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-              Toast.makeText(context,"download ",Toast.LENGTH_LONG).show();
-                name=dataSet.get(position).getFilename();
+              Toast.makeText(context,"downloading image...",Toast.LENGTH_LONG).show();
+
+              name=dataSet.get(position).getFilename();
               String url= dataSet.get(position).getPostUrl();
               String download_url=url+"/download";
-              String name= UUID.randomUUID().toString()+"'jpg";
+              // load image ......
               Picasso.with(context)
                       .load(download_url)
                       .into(target);
+
           }
 
       });
-
 
 
     }
@@ -91,43 +96,37 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
                 public void run() {
 
 
-                    File sd= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                    File folder= new File (sd,"/Picsum");
+                    File sd = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                    File folder = new File(sd, "/Picsum");
 
-                    if(!folder.mkdir()){
+                    if (!folder.mkdir()) {
                         Log.e("ERROR", "Cannot create a directory!");
-                    }else{
-                        Log.e("run:"," directory create" );
+                    } else {
+                        Log.e("run:", " directory create");
                         folder.mkdir();
                     }
+                    String ren;
+                    ren = randomq(name);
 
-                    File filename= new File (folder,name);
-
-                   if(filename.exists()){
-                       Log.e("ERROR", "filename exist");
-
-                       try{
-                        filename.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-
-                    }
+                    File filename = new File(folder,ren);
 
                         try {
                             FileOutputStream outputStream =
                                     new FileOutputStream(String.valueOf(filename));
 
-                            bitmap.compress(Bitmap.CompressFormat.JPEG,40,outputStream);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 40, outputStream);
                             Log.e("run", "complete");
+
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
+                     //   }
 
+                    }
 
-                }
             }).start();
+
+
 
         }
 
@@ -143,9 +142,26 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
     };
 
 
+
     @Override
     public int getItemCount() {
         return 20;
     }
+
+
+    private  static String randomq(String filename)
+    {
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = generator.nextInt(filename.length());
+        char tempChar;
+        for (int i = 0; i < randomLength; i++){
+            if(randomLength == 0) randomLength = 10 ;
+            tempChar = (char) (generator.nextInt(96) + 32);
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString()+".jpg";
+    }
+
 
 }
