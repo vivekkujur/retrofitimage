@@ -1,5 +1,6 @@
 package com.example.uchiha.lokaldemo;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -34,6 +35,7 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
 
     private final Context context;
     private String name;
+    ProgressDialog progressDialog;
 
     public Recycler_Adapter(List<Recycler_model> dataSet, Context context) {
         this.context=context;
@@ -46,7 +48,7 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
 
         View view=LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.imagecard,parent,false);
-
+        progressDialog=new ProgressDialog(context);
         Recycler_holder recycler_holder =new Recycler_holder(view);
 
         return recycler_holder;
@@ -82,10 +84,13 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
     private Target target=new Target() {
         @Override
         public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+
             Log.d(TAG, "onBitmapLoaded: ");
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+
+
                     File sd= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
                     File folder= new File (sd,"/Picsum");
 
@@ -98,26 +103,27 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
 
                     File filename= new File (folder,name);
 
-                   /* if(!filename.exists()){
-                    try{
+                   if(filename.exists()){
+                       Log.e("ERROR", "filename exist");
+
+                       try{
                         filename.createNewFile();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
 
-                    }*/
+                    }
 
                         try {
                             FileOutputStream outputStream =
                                     new FileOutputStream(String.valueOf(filename));
 
                             bitmap.compress(Bitmap.CompressFormat.JPEG,40,outputStream);
-                            
+                            Log.e("run", "complete");
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
-
 
 
                 }
@@ -139,7 +145,7 @@ public class Recycler_Adapter extends RecyclerView.Adapter <Recycler_holder> {
 
     @Override
     public int getItemCount() {
-        return this.dataSet.size();
+        return 20;
     }
 
 }

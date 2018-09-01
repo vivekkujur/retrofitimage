@@ -1,6 +1,7 @@
 package com.example.uchiha.lokaldemo;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity{
 
     private static final String TAG = "MainActivity";
 
+    private ProgressDialog progressDialog;
+
     private static final String WRITE_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     private static final String READ_STORAGE = Manifest.permission.READ_EXTERNAL_STORAGE;
     private static final int STORAGE_PERMISSION_REQUEST_CODE = 1234;
@@ -58,17 +61,15 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView=findViewById(R.id.responseText);
 
+        progressDialog=new ProgressDialog(this);
         getLocationPermission();
-
-
-
-
-
-
+        recyclerView=findViewById(R.id.recyclerview);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
     }
+
 
     private void download() {
        // listCall1= apiInterface.get
@@ -77,10 +78,9 @@ public class MainActivity extends AppCompatActivity{
 
     private void showjson() {
 
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
         apiInterface = APIClient.getClient().create(APIInterface.class);
-        recyclerView=findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         listCall1=apiInterface.getlist();
         listCall1.enqueue(new Callback<List<Recycler_model>>() {
@@ -90,6 +90,8 @@ public class MainActivity extends AppCompatActivity{
            List<Recycler_model> data= response.body();
            adapter = new Recycler_Adapter(data,getApplicationContext());
            Toast.makeText(MainActivity.this,"sucess",Toast.LENGTH_LONG).show();
+
+           progressDialog.dismiss();
            recyclerView.setAdapter(adapter);
 
 
